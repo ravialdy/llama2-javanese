@@ -11,8 +11,8 @@ def main():
     parser.add_argument('--checkpoint_location', type=str, help="The folder the script will write checkpoint files to.")
     parser.add_argument('--base_dataset', type=str, default="OpenAssistant/oasst1", help="The base dataset to translate.")
     parser.add_argument('--checkpoint_n', type=int, default=400, help="Number of records after which a checkpoint file will be written.")
-    parser.add_argument('--batch_size', type=int, default=10, help="Batch size for translation. Adjust based on your GPU capacity.")
-    parser.add_argument('--max_length', type=int, default=None, help='Max tokens to generate. Default is unlimited.')
+    parser.add_argument('--batch_size', type=int, default=20, help="Batch size for translation. Adjust based on your GPU capacity.")
+    parser.add_argument('--max_length', type=int, default=1024, help='Max tokens to generate. Default is 1024.')
     parser.add_argument('--cpu', action='store_true', help="Use CPU instead of GPU.")
     parser.add_argument('--model_size', type=str, default="distilled-600M", choices=['distilled-600M', '1.3B', 'distilled-1.3B', '3.3B'], help='NLLB model size to use.')
 
@@ -45,12 +45,10 @@ def main():
             if texts_to_translate:
                 translated_batch = translator.translate(texts_to_translate)
                 for idx, translation in zip(indices_to_translate, translated_batch):
-                    batch_text[idx] = translation
-                    batch_lang[idx] = 'jav_Latn'
-
-            for i in range(len(batch['text'])):
-                record = {key: batch[key][i] for key in batch}
-                translated_texts.append(record)
+                    record = {key: batch[key][idx] for key in batch}
+                    record['text'] = translation
+                    record['lang'] = 'jav_Latn'
+                    translated_texts.append(record)
 
             pbar.update(len(batch_text))
 

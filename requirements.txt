@@ -1,6 +1,5 @@
 accelerate==0.25.0
 peft==0.6.2
-bitsandbytes==0.41.2.post2
 transformers==4.36.2
 trl==0.7.4
 sentencepiece==0.1.99
@@ -12,3 +11,4 @@ tensorboardx==2.6.2.2
 pandas==1.5.3
 tqdm
 sacrebleu
+bitsandbytes
