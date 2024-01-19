@@ -41,7 +41,9 @@ def main():
     parser.add_argument('--batch_size', type=int, default=4,
                         help='The batch size to use in finetuning. Adjust to fit in your GPU vRAM. Default is 4')
     parser.add_argument('--threads_output_name', type=str, default=None,
-                        help='If specified, the threads created in this script for finetuning will also be saved to disk or HuggingFace Hub.')    
+                        help='If specified, the threads created in this script for finetuning will also be saved to disk or HuggingFace Hub.')
+    parser.add_argument('--gpu_id', type=int, default=0, 
+                        help='GPU ID to use for training. Defaults to 0.')    
     
     args = parser.parse_args()
     base_model = args.base_model
@@ -57,6 +59,9 @@ def main():
     num_train_epochs = args.num_train_epochs
     per_device_train_batch_size = args.batch_size
     threads_output_name = args.threads_output_name
+
+    device = torch.device(f"cuda:{args.gpu_id}" if torch.cuda.is_available() else "cpu")
+    torch.cuda.set_device(device)
 
     # Check for HF_TOKEN
     if 'HF_TOKEN' not in os.environ:
