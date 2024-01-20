@@ -10,8 +10,8 @@ def main():
     parser = argparse.ArgumentParser(description="Script to run inference on a tuned model.")
     parser.add_argument('--model_name', type=str, 
                         help='The name of the tuned model that you pushed to Huggingface in the previous step.')
-    parser.add_argument('--instruction_prompt', type=str, 
-                        help='An instruction message added to every prompt given to the chatbot to force it to answer in the target language.Example: "You are a generic chatbot that always answers in Javanese language."')
+    parser.add_argument('--instruction_prompt', type=str, default='Sampeyan minangka chatbot umum sing tansah mangsuli nganggo basa Jawa.',
+                        help='An instruction message added to every prompt given to the chatbot to force it to answer in the target language.')
     parser.add_argument('--input', type=str,
                         help='The actual chat input prompt. The script is only meant for testing purposes and exits after answering.')
     args = parser.parse_args()
