@@ -17,10 +17,12 @@ import pandas as pd
 
 def main():
     parser = argparse.ArgumentParser(description="Finetune a base instruct/chat model using (Q)LoRA and PEFT")
-    parser.add_argument('--tuned_model', type=str,
+    parser.add_argument('--tuned_model', type=str, default="ravialdy/llama2-javanese-chat",
                         help='The name of the resulting tuned model.')
-    parser.add_argument('--dataset_name', type=str,
+    parser.add_argument('--dataset_name', type=str, default="ravialdy/javanese-translated",
                         help='The name of the dataset to use for fine-tuning. This should be the output of the combine_checkpoints script.')
+    parser.add_argument('--output_dir', type=str, default="saved_model",
+                        help='The name of the output dir for saving the trained model.')
     parser.add_argument('--instruction_prompt', type=str, default="Sampeyan minangka chatbot umum sing tansah mangsuli nganggo basa Jawa.",
                         help='An instruction message added to every prompt given to the chatbot to force it to answer in the target language.')
     parser.add_argument('--base_model', type=str, default="NousResearch/Llama-2-7b-chat-hf",
@@ -37,10 +39,10 @@ def main():
                         help="The dataset's column name containing the role of the author of the text (eg. prompter, assistant). Defaults to role")
     parser.add_argument('--max_seq_length', type=int, default=512,
                         help='The maximum sequence length to use in finetuning. Should most likely line up with your base model\'s default max_seq_length. Default is 512.')
-    parser.add_argument('--num_train_epochs', type=int, default=2,
+    parser.add_argument('--num_train_epochs', type=int, default=10,
                         help='Number of epochs to use. 2 is default and has been shown to work well.')
-    parser.add_argument('--batch_size', type=int, default=4,
-                        help='The batch size to use in finetuning. Adjust to fit in your GPU vRAM. Default is 4')
+    parser.add_argument('--batch_size', type=int, default=2,
+                        help='The batch size to use in finetuning. Adjust to fit in your GPU vRAM. Default is 2')
     parser.add_argument('--threads_output_name', type=str, default=None,
                         help='If specified, the threads created in this script for finetuning will also be pushed to HuggingFace Hub.')
     parser.add_argument('--gpu_id', type=int, default=0, 
@@ -60,6 +62,7 @@ def main():
     num_train_epochs = args.num_train_epochs
     per_device_train_batch_size = args.batch_size
     threads_output_name = args.threads_output_name
+    output_dir = args.output_dir
 
     # os.environ["CUDA_VISIBLE_DEVICES"] = f"cuda:{args.gpu_id}"
     # os.environ["WORLD_SIZE"] = "1"
@@ -96,13 +99,11 @@ def main():
 
     # Set up quantization config
     quant_config = BitsAndBytesConfig(
-        load_in_4bit=True,
-        bnb_4bit_quant_type="nf4",
-        bnb_4bit_compute_dtype=getattr(torch, "float16"),
-        bnb_4bit_use_double_quant=True,
+        load_in_4bit=True
     )
     # Load base model
-    model = AutoModelForCausalLM.from_pretrained(base_model, quantization_config=quant_config, device_map={"": Accelerator().local_process_index})
+    model = AutoModelForCausalLM.from_pretrained(base_model, quantization_config=quant_config, device_map={"": Accelerator().local_process_index},
+                                                 torch_dtype=torch.bfloat16)
 
     model.config.use_cache = False
     model.config.pretraining_tp = 1
@@ -126,17 +127,19 @@ def main():
         num_train_epochs=num_train_epochs,
         per_device_train_batch_size=per_device_train_batch_size,
         gradient_accumulation_steps=1,
+        gradient_checkpointing=True,
         optim="paged_adamw_32bit",
         save_steps=400,
         logging_steps=200,
         learning_rate=2e-4,
         weight_decay=0.001,
-        bf16=False,
+        bf16=True,
         max_grad_norm=0.3,
         max_steps=-1,
         warmup_ratio=0.03,
         group_by_length=True,
         lr_scheduler_type="constant",
+        ddp_find_unused_parameters=False,
         report_to="tensorboard"
     )
     trainer = SFTTrainer(
@@ -152,9 +155,12 @@ def main():
 
     # Before starting training, free up memory
     torch.cuda.empty_cache()
-    print(f"[---- LLaMa2Lang ----] Starting training")
+    print(f"[------START TRAINING PROCESS MULTI-GPUs TRAINING (DeepSpeed + TRL + PEFT) ------]")
     # Train the model
     trainer.train()
+
+    # Save the model
+    trainer.save_model(output_dir)
 
     # Try to push to hub, requires HF_TOKEN environment variable to be set, see https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables#hftoken
     trainer.model.push_to_hub(tuned_model)

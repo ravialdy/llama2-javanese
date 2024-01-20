@@ -1,14 +1,11 @@
-import bitsandbytes as bnb
-from functools import partial
 from peft import AutoPeftModelForCausalLM
 import torch
 from transformers import AutoTokenizer
-import sys
 import argparse
 
 def main():
     parser = argparse.ArgumentParser(description="Script to run inference on a tuned model.")
-    parser.add_argument('--model_name', type=str, 
+    parser.add_argument('--model_name', type=str, default='ravialdy/llama2-javanese-chat',
                         help='The name of the tuned model that you pushed to Huggingface in the previous step.')
     parser.add_argument('--instruction_prompt', type=str, default='Sampeyan minangka chatbot umum sing tansah mangsuli nganggo basa Jawa.',
                         help='An instruction message added to every prompt given to the chatbot to force it to answer in the target language.')
