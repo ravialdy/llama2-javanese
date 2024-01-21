@@ -1,4 +1,7 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, render_template
+import os
+import webbrowser
+from threading import Timer
 import torch
 from peft import AutoPeftModelForCausalLM
 from transformers import AutoTokenizer
@@ -14,6 +17,10 @@ model.eval()
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 tokenizer.pad_token_id = 0
 tokenizer.padding_side = "left"
+
+@app.route('/')
+def index():
+    return render_template('index.html')
 
 @app.route('/chat', methods=['POST'])
 def chat():
@@ -32,5 +39,10 @@ def chat():
     generated_text = tokenizer.decode(output_sequences[0], skip_special_tokens=True)
     return jsonify({'response': generated_text})
 
+def open_browser():
+    webbrowser.open_new('http://127.0.0.1:5000/')
+
 if __name__ == '__main__':
+    if os.environ.get('WERKZEUG_RUN_MAIN') != 'true':
+        Timer(1, open_browser).start()
     app.run(debug=True)

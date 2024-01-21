@@ -4,7 +4,7 @@ from transformers import AutoTokenizer
 import argparse
 
 def main():
-    parser = argparse.ArgumentParser(description="Script to run inference on a tuned model.")
+    parser = argparse.ArgumentParser(description="Script to run inference on a finetuned model.")
     parser.add_argument('--model_name', type=str, default='ravialdy/llama2-javanese-chat',
                         help='The name of the tuned model that you pushed to Huggingface in the previous step.')
     parser.add_argument('--instruction_prompt', type=str, default='Sampeyan minangka chatbot umum sing tansah mangsuli nganggo basa Jawa.',
