@@ -4,7 +4,7 @@ from transformers import AutoTokenizer
 import argparse
 
 def main():
-    parser = argparse.ArgumentParser(description="Script to run inference on a finetuned model.")
+    parser = argparse.ArgumentParser(description="Script to run inference on a tuned model.")
     parser.add_argument('--model_name', type=str, default='ravialdy/llama2-javanese-chat',
                         help='The name of the tuned model that you pushed to Huggingface in the previous step.')
     parser.add_argument('--instruction_prompt', type=str, default='Sampeyan minangka chatbot umum sing tansah mangsuli nganggo basa Jawa.',
@@ -34,8 +34,11 @@ def main():
         max_length=200,
         repetition_penalty=1.2 # LLaMa2 is sensitive to repetition
     )
-    generated_text = tokenizer.decode(output_sequences[0], skip_special_tokens=True)
-    print(generated_text)
+    input_length = inputs['input_ids'].shape[1]
+    generated_text = tokenizer.decode(output_sequences[0][input_length:], skip_special_tokens=True)
+
+    print("-----------------------------------------------------------")
+    print("Finetuned LLaMa2 Response:\n" + generated_text)
 
 if __name__ == "__main__":
     main()
