@@ -42,7 +42,7 @@ pip install -r requirements.txt
 # Translate OASST1 and OASST2 to Javanese language using NLLB model
 python translate2java.py --checkpoint_location target_folder
 
-# Collect all of the json files to convert an entire javanese dataset
+# Collect all of the json files to convert it into an entire javanese dataset
 python collect_translation.py --input_dir {input folder} --output_dir {output dir}
 
 # Finetune LLaMA-2 using DeepSpeed + TRL + PEFT
