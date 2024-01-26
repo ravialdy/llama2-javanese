@@ -20,7 +20,7 @@ This repository also contains step-by-step techniques along with the codes to bu
 2.  Finetune LLaMA-2 to become chatbot that is fully suitable with basa Jawa.
 3.  Utilize latest tools, such as DeepSpeed, TRL, and LORA PEFT to enable fast and efficient multi-GPUs training to further improve the speed.
 4.  Finetune LLaMA-2 based on the translated instruct javanese from Huggingface.
-5.  Simple deployment of finetuned LLaMA-2 model with Flask*.
+5.  Simple deployment of finetuned LLaMA-2 model with Flask.
 
 ## 📘 Using This Repo
 
@@ -62,9 +62,7 @@ python deploy_llama2.py
 3.  Collect all the translation json files into single translated javanese dataset and publish it in the Huggingface.
 4.  Finetune LLaMA-2 based on the translated instruct javanese from Huggingface.
 5.  Run inference for the finetuned LLaMA-2 from Huggingface.
-6.  Deploy the finetuned LLaMA-2 with Flask*.
-
-*Note : Still in progress for making efficient deployment to eliminate memory limitation in my computer.
+6.  Deploy the finetuned LLaMA-2 with Flask.
 
 
 ### 📚 Code References :
