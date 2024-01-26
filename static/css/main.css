@@ -26,3 +26,10 @@
 .input-box button {
     padding: 5px 10px;
 }
+
+.loading-indicator {
+    text-align: center;
+    padding: 10px;
+    margin-top: 10px;
+    font-weight: bold;
+}
